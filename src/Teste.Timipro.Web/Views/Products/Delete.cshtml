@@ -1,0 +1,51 @@
+﻿@model Teste.Timipro.Entities.ProductEntity
+
+@{
+    ViewBag.Title = "Excluir Produto";
+}
+
+<h2>Excluir Produto</h2>
+
+<h3>Você tem certeza que deseja excluir este produto?</h3>
+<div>
+    <h4>Produto</h4>
+
+    @if (ViewBag.MessageError != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewBag.MessageError
+        </div>
+    }
+
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ProductName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ProductName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Active)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Active)
+        </dd>
+
+    </dl>
+
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Excluir" class="btn btn-danger" /> |
+            @Html.ActionLink("Voltar para a lista", "Index", new { }, new { @class = "btn btn-primary" })
+        </div>
+
+    }
+</div>

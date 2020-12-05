@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Teste.Timipro.Entities.ClientEntity>
+
+@{
+    ViewBag.Title = "Lista de Usuários";
+}
+
+<h2>Lista de Usuários</h2>
+
+<p>
+    @Html.ActionLink("Criar Novo Usuário", "Create", new { }, new { @class = "btn btn-primary" })
+</p>
+<table class="table">
+    <tr>
+
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Product.ProductName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.CPF)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.Name)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Product.ProductName)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Email)
+    </td>
+
+    <td>
+        @Html.DisplayFor(modelItem => item.CPF)
+    </td>
+    <td>
+        @Html.ActionLink("Editar", "Edit", new { id = item.ClientID }, new { @class = "btn btn-warning" }) |
+        @Html.ActionLink("Detalhes", "Details", new { id = item.ClientID }, new { @class = "btn btn-info" }) |
+        @Html.ActionLink("Excluir", "Delete", new { id = item.ClientID }, new { @class = "btn btn-danger" })
+    </td>
+</tr>
+}
+
+</table>
