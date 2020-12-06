@@ -29,3 +29,9 @@ Esta é uma aplicação criada para um teste na empresa TIMIPRO. É Um CRUD capa
 
 7. Cadastro de Clientes (Regras 1, 2 e 3)
 ![](https://raw.githubusercontent.com/UandersonS/timipro-teste-dev-jr/main/projeto-imagens/003%20-%20Clientes%20-%20Cadastro%20-%20Regras.PNG)
+
+8. Edição de Clientes
+![](https://raw.githubusercontent.com/UandersonS/timipro-teste-dev-jr/main/projeto-imagens/008%20-%20Clientes%20-%20Edi%C3%A7%C3%A3o.PNG)
+
+9. Exclusão de Clientes
+![](https://raw.githubusercontent.com/UandersonS/timipro-teste-dev-jr/main/projeto-imagens/009%20-%20Clientes%20-%20Exclus%C3%A3o.PNG)
