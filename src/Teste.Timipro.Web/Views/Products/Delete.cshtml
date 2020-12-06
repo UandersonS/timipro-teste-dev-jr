@@ -10,12 +10,7 @@
 <div>
     <h4>Produto</h4>
 
-    @if (ViewBag.MessageError != null)
-    {
-        <div class="alert alert-danger" role="alert">
-            @ViewBag.MessageError
-        </div>
-    }
+    @Html.Partial("_AlertMessageError")
 
     <hr />
     <dl class="dl-horizontal">

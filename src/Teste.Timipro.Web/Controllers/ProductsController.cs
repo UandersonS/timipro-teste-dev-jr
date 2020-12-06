@@ -1,7 +1,9 @@
-﻿using System.Data.Entity;
+﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using Teste.Timipro.Business;
 using Teste.Timipro.Database;
 using Teste.Timipro.Entities;
 
@@ -10,11 +12,12 @@ namespace Teste.Timipro.Web.Controllers
     public class ProductsController : Controller
     {
         private TimiproContext db = new TimiproContext();
+        ProductBusiness productBusiness = new ProductBusiness();
 
         // GET: Products
         public ActionResult Index()
         {
-            return View(db.Products.ToList());
+            return View(productBusiness.GetAll());
         }
 
         // GET: Products/Details/5
@@ -24,7 +27,8 @@ namespace Teste.Timipro.Web.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductEntity product = db.Products.Find(id);
+            ProductEntity product = productBusiness.Get(id.Value);
+
             if (product == null)
             {
                 return HttpNotFound();
@@ -47,11 +51,9 @@ namespace Teste.Timipro.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                db.Products.Add(product);
-                db.SaveChanges();
+                productBusiness.Save(product);
                 return RedirectToAction("Index");
             }
-
             return View(product);
         }
 
@@ -62,7 +64,7 @@ namespace Teste.Timipro.Web.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductEntity product = db.Products.Find(id);
+            ProductEntity product = productBusiness.Get(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -77,12 +79,19 @@ namespace Teste.Timipro.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ProductID,ProductName,Active")] ProductEntity product)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(product).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    productBusiness.Save(product);
+                    return RedirectToAction("Index");
+                }
             }
+            catch (Exception ex)
+            {
+                ViewBag.MessageError = ex.Message;
+            }
+
             return View(product);
         }
 
@@ -93,7 +102,7 @@ namespace Teste.Timipro.Web.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ProductEntity product = db.Products.Find(id);
+            ProductEntity product = productBusiness.Get(id.Value);
             if (product == null)
             {
                 return HttpNotFound();
@@ -106,28 +115,17 @@ namespace Teste.Timipro.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-
-            ProductEntity product = db.Products.Find(id);
-
-            if (product.Clients.Any())
+            ProductEntity product = productBusiness.Get(id);
+            try
             {
-                ViewBag.MessageError = "Não é possível excluir um produto com cliente associado";
+                productBusiness.Delete(id);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.MessageError = ex.Message;
                 return View(product);
-
             }
-
-            db.Products.Remove(product);
-            db.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

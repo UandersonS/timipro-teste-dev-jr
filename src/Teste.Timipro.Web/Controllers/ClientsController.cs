@@ -1,20 +1,20 @@
-﻿using System.Data.Entity;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Web.Mvc;
-using Teste.Timipro.Database;
+using Teste.Timipro.Business;
 using Teste.Timipro.Entities;
 
 namespace Teste.Timipro.Web.Controllers
 {
     public class ClientsController : Controller
     {
-        private TimiproContext db = new TimiproContext();
+        ClientBusiness clientBusiness = new ClientBusiness();
+        ProductBusiness productBusiness = new ProductBusiness();
+
         // GET: clients
         public ActionResult Index()
         {
-            var clients = db.Clients.Include(c => c.Product);
-            return View(clients.ToList());
+            var clients = clientBusiness.GetAll();
+            return View(clients);
         }
 
         // GET: clients/Details/5
@@ -24,7 +24,9 @@ namespace Teste.Timipro.Web.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ClientEntity client = db.Clients.Find(id);
+
+            ClientEntity client = clientBusiness.Get(id.Value);
+
             if (client == null)
             {
                 return HttpNotFound();
@@ -35,10 +37,7 @@ namespace Teste.Timipro.Web.Controllers
         // GET: clients/Create
         public ActionResult Create()
         {
-            var products = db.Products.Where(p => p.Active && !p.Clients.Any());
-
-
-            ViewBag.ProductId = new SelectList(products, "ProductID", "ProductName");
+            ViewBag.ProductId = new SelectList(productBusiness.GetActiveProducts(), "ProductID", "ProductName");
             return View();
         }
 
@@ -49,69 +48,64 @@ namespace Teste.Timipro.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "ClientID,Name,Email,CPF,ProductId")] ClientEntity client)
         {
-            if (db.Clients.Any(u => u.Email == client.Email))
+            if (clientBusiness.HasClientWithEmail(client.Email))
             {
                 ModelState.AddModelError("Email", "Este E-Mail já foi cadastrado");
             }
-
-            if (db.Clients.Any(u => u.CPF == client.CPF))
+            if (clientBusiness.HasClientWithCPF(client.CPF))
             {
                 ModelState.AddModelError("CPF", "Este CPF já foi cadastrado");
             }
+
             if (ModelState.IsValid)
             {
-                db.Clients.Add(client);
-                db.SaveChanges();
+                clientBusiness.Save(client);
                 return RedirectToAction("Index");
             }
-
-            var products = db.Products.Where(p => p.Active && !p.Clients.Any());
-            ViewBag.ProductId = new SelectList(products, "ProductID", "ProductName", client.ProductId);
+            ViewBag.ProductId = new SelectList(productBusiness.GetActiveProducts(), "ProductID", "ProductName", client.ProductId);
             return View(client);
         }
 
         // GET: clients/Edit/5
         public ActionResult Edit(int? id)
         {
-            var products = db.Products.Where(p => p.Active && !p.Clients.Any());
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ClientEntity client = db.Clients.Find(id);
+            ClientEntity client = clientBusiness.Get(id.Value);
             if (client == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.ProductId = new SelectList(products, "ProductID", "ProductName", client.ProductId);
+            ViewBag.ProductId = new SelectList(productBusiness.GetActiveProducts(client.ClientID), "ProductID", "ProductName", client.ProductId);
             return View(client);
         }
 
         // POST: clients/Edit/5
         // Para proteger-se contra ataques de excesso de postagem, ative as propriedades específicas às quais deseja se associar. 
         // Para obter mais detalhes, confira https://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ClientID,Name,Email,CPF,ProductId")] ClientEntity client)
         {
 
-            if (db.Clients.Any(u => u.Email == client.Email && u.ClientID != client.ClientID))
+            if (clientBusiness.HasClientWithEmail(client.Email, client.ClientID))
             {
                 ModelState.AddModelError("Email", "Este E-Mail ja foi cadastrado");
             }
-            if (db.Clients.Any(u => u.CPF == client.CPF && u.ClientID != client.ClientID))
+            if (clientBusiness.HasClientWithCPF(client.CPF, client.ClientID))
             {
                 ModelState.AddModelError("CPF", "Este CPF já foi cadastrado");
             }
+
             if (ModelState.IsValid)
             {
-                db.Entry(client).State = EntityState.Modified;
-                db.SaveChanges();
+                clientBusiness.Save(client);
                 return RedirectToAction("Index");
             }
-
-            var products = db.Products.Where(p => p.Active && !p.Clients.Any());
-            ViewBag.ProductId = new SelectList(products, "ProductID", "ProductName", client.ProductId);
+            ViewBag.ProductId = new SelectList(productBusiness.GetActiveProducts(client.ClientID), "ProductID", "ProductName", client.ProductId);
             return View(client);
         }
 
@@ -122,7 +116,9 @@ namespace Teste.Timipro.Web.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            ClientEntity client = db.Clients.Find(id);
+
+            ClientEntity client = clientBusiness.Get(id.Value);
+
             if (client == null)
             {
                 return HttpNotFound();
@@ -135,20 +131,9 @@ namespace Teste.Timipro.Web.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-
-            ClientEntity client = db.Clients.Find(id);
-            db.Clients.Remove(client);
-            db.SaveChanges();
+            clientBusiness.Delete(id);
             return RedirectToAction("Index");
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
     }
 }
